@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>convulate</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>convulate</h1>
+        <label for="inputValue">Nilai:</label>
+        <input type="text" id="inputValue" placeholder="Masukkan nilai">
+
+        <label for="conversionType">Jenis Konversi:</label>
+        <select id="conversionType">
+            <option value="length">Panjang</option>
+            <option value="temperature">Suhu</option>
+            <option value="currency">Mata Uang</option>
+            <option value="number">Bilangan</option>
+        </select>
+
+        <label for="fromUnit">Dari:</label>
+        <select id="fromUnit">
+            <!-- Option akan diisi oleh JavaScript -->
+        </select>
+
+        <label for="toUnit">Ke:</label>
+        <select id="toUnit">
+            <!-- Option akan diisi oleh JavaScript -->
+        </select>
+
+        <button onclick="convert()">Konversi</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const lengthUnits = ['meter', 'kilometer', 'centimeter', 'millimeter', 'inch', 'foot', 'yard', 'mile'];
+        const temperatureUnits = ['celsius', 'fahrenheit', 'kelvin'];
+        const currencyUnits = ['USD', 'EUR', 'IDR', 'JPY'];
+        const numberUnits = ['decimal', 'binary', 'hexadecimal', 'octal'];
+
+        document.getElementById('conversionType').addEventListener('change', updateUnits);
+
+        function updateUnits() {
+            const conversionType = document.getElementById('conversionType').value;
+            const fromUnit = document.getElementById('fromUnit');
+            const toUnit = document.getElementById('toUnit');
+            
+            let units = [];
+            switch (conversionType) {
+                case 'length':
+                    units = lengthUnits;
+                    break;
+                case 'temperature':
+                    units = temperatureUnits;
+                    break;
+                case 'currency':
+                    units = currencyUnits;
+                    break;
+                case 'number':
+                    units = numberUnits;
+                    break;
+            }
+
+            fromUnit.innerHTML = '';
+            toUnit.innerHTML = '';
+
+            units.forEach(unit => {
+                fromUnit.innerHTML += `<option value="${unit}">${unit}</option>`;
+                toUnit.innerHTML += `<option value="${unit}">${unit}</option>`;
+            });
+        }
+
+        function convert() {
+            const conversionType = document.getElementById('conversionType').value;
+            const inputValue = parseFloat(document.getElementById('inputValue').value);
+            const fromUnit = document.getElementById('fromUnit').value;
+            const toUnit = document.getElementById('toUnit').value;
+            let result = '';
+
+            if (conversionType === 'length') {
+                result = lengthConversion(inputValue, fromUnit, toUnit);
+            } else if (conversionType === 'temperature') {
+                result = temperatureConversion(inputValue, fromUnit, toUnit);
+            } else if (conversionType === 'currency') {
+                result = currencyConversion(inputValue, fromUnit, toUnit);
+            } else if (conversionType === 'number') {
+                result = numberConversion(inputValue, fromUnit, toUnit);
+            }
+
+            document.getElementById('result').innerText = `Hasil: ${result}`;
+        }
+
+        function lengthConversion(value, from, to) {
+            const conversionRates = {
+                meter: 1,
+                kilometer: 0.001,
+                centimeter: 100,
+                millimeter: 1000,
+                inch: 39.3701,
+                foot: 3.28084,
+                yard: 1.09361,
+                mile: 0.000621371
+            };
+            return (value * conversionRates[to] / conversionRates[from]).toFixed(4);
+        }
+
+        function temperatureConversion(value, from, to) {
+            if (from === to) return value;
+
+            if (from === 'celsius') {
+                if (to === 'fahrenheit') {
+                    return (value * 9/5 + 32).toFixed(2);
+                } else if (to === 'kelvin') {
+                    return (value + 273.15).toFixed(2);
+                }
+            } else if (from === 'fahrenheit') {
+                if (to === 'celsius') {
+                    return ((value - 32) * 5/9).toFixed(2);
+                } else if (to === 'kelvin') {
+                    return ((value - 32) * 5/9 + 273.15).toFixed(2);
+                }
+            } else if (from === 'kelvin') {
+                if (to === 'celsius') {
+                    return (value - 273.15).toFixed(2);
+                } else if (to === 'fahrenheit') {
+                    return ((value - 273.15) * 9/5 + 32).toFixed(2);
+                }
+            }
+        }
+
+        function currencyConversion(value, from, to) {
+            const conversionRates = {
+                USD: 1,
+                EUR: 0.85,
+                IDR: 14500,
+                JPY: 110
+            };
+            return (value * conversionRates[to] / conversionRates[from]).toFixed(2);
+        }
+
+        function numberConversion(input, from, to) {
+            let decimal = from === 'binary' ? parseInt(input, 2) :
+                          from === 'hexadecimal' ? parseInt(input, 16) :
+                          from === 'octal' ? parseInt(input, 8) :
+                          parseInt(input);
+
+            if (to === 'decimal') {
+                return decimal;
+            } else if (to === 'binary') {
+                return decimal.toString(2);
+            } else if (to === 'hexadecimal') {
+                return decimal.toString(16);
+            } else if (to === 'octal') {
+                return decimal.toString(8);
+            }
+        }
+
+        updateUnits();
+    </script>
+</body>
+</html>
